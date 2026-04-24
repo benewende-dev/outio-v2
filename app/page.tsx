@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles, Zap, Globe, Image, Video, Mic } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const FEATURES = [
   { icon: Sparkles, title: "29 Agents IA",        desc: "Agents autonomes spécialisés pour chaque métier" },
@@ -30,6 +31,7 @@ export default function LandingPage() {
             <Link href="#pricing"  className="hover:text-[var(--accent)] transition-colors">Tarifs</Link>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link href="/login"
               className="text-sm px-4 py-2 rounded-lg transition-colors hover:bg-[var(--bg-surface)]"
               style={{ color: "var(--text-muted)" }}>

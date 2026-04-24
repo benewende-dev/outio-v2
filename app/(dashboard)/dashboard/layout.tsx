@@ -7,6 +7,7 @@ import {
   Megaphone, GalleryHorizontal, BookOpen, CreditCard,
   Compass, Settings, LayoutDashboard, LogOut, ChevronRight,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { href: "/dashboard",           icon: LayoutDashboard,    label: "Accueil" },
@@ -59,6 +60,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Credits + Logout */}
         <div className="p-4 border-t space-y-3" style={{ borderColor: "var(--border)" }}>
+          <div className="flex justify-end">
+            <ThemeToggle />
+          </div>
           <div className="card p-3">
             <div className="flex justify-between text-xs mb-2" style={{ color: "var(--text-muted)" }}>
               <span>Crédits</span>

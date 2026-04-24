@@ -46,20 +46,29 @@
   --accent-light: #A4C3B2;
 }
 
-/* ─── Dark mode ───────────────────────────────────────── */
+/* ─── Dark mode — Sauge Nuit ──────────────────────────── */
 .dark {
-  --bg:           #0f1f18;
-  --bg-light:     #162b20;
-  --bg-card:      #1c3028;
-  --bg-surface:   #243d32;
+  --bg:           #111a16;
+  --bg-light:     #172219;
+  --bg-card:      #1e2e24;
+  --bg-surface:   #263c2e;
   --border:       #2d4f3e;
   --border-strong:#3d6b55;
-  --text:         #e8f4f0;
+  --text:         #e6f2ec;
   --text-muted:   #a4c3b2;
   --text-subtle:  #6b9080;
-  --accent:       #6B9080;
-  --accent-hover: #7da090;
+  --accent:       #7aaa96;
+  --accent-hover: #8cbda8;
   --accent-light: #A4C3B2;
+}
+
+/* Transitions fluides au changement de thème */
+html { transition: background-color 0.25s ease, color 0.25s ease; }
+.dark body { background-color: var(--bg); }
+
+/* Dark — gradient adapté */
+.dark .gradient-soft {
+  background: linear-gradient(135deg, #111a16 0%, #172219 100%);
 }
 
 /* ─── Base ────────────────────────────────────────────── */
