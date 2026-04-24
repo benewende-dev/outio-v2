@@ -37,7 +37,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b" style={{ borderColor: "var(--border)" }}>
-          <span className="font-bold text-xl tracking-tight" style={{ color: "var(--accent)" }}>outio</span>
+          <span className="font-bold text-xl tracking-tight" style={{ color: "var(--accent)" }}>Outio</span>
         </div>
 
         {/* Nav */}
