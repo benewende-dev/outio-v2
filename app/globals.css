@@ -46,7 +46,7 @@
   --accent-light: #A4C3B2;
 }
 
-/* ─── Dark mode — Sauge Nuit ──────────────────────────── */
+/* ─── Mode Sauge (dark vert) ──────────────────────────── */
 .dark {
   --bg:           #111a16;
   --bg-light:     #172219;
@@ -62,13 +62,31 @@
   --accent-light: #A4C3B2;
 }
 
-/* Transitions fluides au changement de thème */
-html { transition: background-color 0.25s ease, color 0.25s ease; }
-.dark body { background-color: var(--bg); }
+/* ─── Mode Noir (dark pur) ────────────────────────────── */
+.noir {
+  --bg:           #0a0a0a;
+  --bg-light:     #111111;
+  --bg-card:      #161616;
+  --bg-surface:   #1e1e1e;
+  --border:       #2a2a2a;
+  --border-strong:#3a3a3a;
+  --text:         #f0f0f0;
+  --text-muted:   #a0a0a0;
+  --text-subtle:  #666666;
+  --accent:       #6B9080;
+  --accent-hover: #7aaa96;
+  --accent-light: #A4C3B2;
+}
 
-/* Dark — gradient adapté */
-.dark .gradient-soft {
-  background: linear-gradient(135deg, #111a16 0%, #172219 100%);
+/* Transitions fluides */
+html { transition: background-color 0.25s ease, color 0.25s ease; }
+
+/* Gradients adaptés */
+.dark .gradient-soft { background: linear-gradient(135deg, #111a16 0%, #172219 100%); }
+.noir .gradient-soft { background: linear-gradient(135deg, #0a0a0a 0%, #111111 100%); }
+.noir .glass {
+  background: rgba(22,22,22,0.8);
+  border: 1px solid rgba(107,144,128,0.15);
 }
 
 /* ─── Base ────────────────────────────────────────────── */
