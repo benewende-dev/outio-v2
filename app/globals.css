@@ -142,3 +142,21 @@ body {
   border-color: var(--border-strong);
   transform: translateY(-1px);
 }
+
+/* ─── Ticker ──────────────────────────────────────────── */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 28s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
+/* ─── Tool card glow (dark modes) ────────────────────── */
+.dark .tool-card:hover,
+.noir .tool-card:hover {
+  box-shadow: 0 0 0 1px var(--border-strong), 0 8px 32px rgba(107,144,128,0.18);
+}
