@@ -1,0 +1,61 @@
+name: Sync opencode from upstream
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"  # Chaque lundi à 8h UTC
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          repository: benewende-dev/opencode
+          token: ${{ secrets.SYNC_TOKEN }}
+          fetch-depth: 0
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/sst/opencode.git
+          git fetch upstream
+
+      - name: Check for upstream changes
+        id: check
+        run: |
+          BEHIND=$(git rev-list HEAD..upstream/main --count 2>/dev/null || echo "0")
+          echo "behind=$BEHIND" >> $GITHUB_OUTPUT
+          echo "Commits behind upstream: $BEHIND"
+
+      - name: Create sync branch
+        if: steps.check.outputs.behind != '0'
+        run: |
+          git checkout -b sync/upstream-$(date +%Y-%m-%d)
+          git merge upstream/main --no-edit --allow-unrelated-histories || true
+
+      - name: Push sync branch
+        if: steps.check.outputs.behind != '0'
+        run: |
+          git push origin sync/upstream-$(date +%Y-%m-%d)
+
+      - name: Create Pull Request
+        if: steps.check.outputs.behind != '0'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.SYNC_TOKEN }}
+          title: "⬆️ Sync upstream opencode — $(date +%Y-%m-%d)"
+          body: |
+            ## Mise à jour depuis opencode upstream
+
+            **Commits en retard :** ${{ steps.check.outputs.behind }}
+
+            ### À vérifier avant de merger :
+            - [ ] Compatibilité CLI/TUI intacte
+            - [ ] Notre config Outio préservée
+            - [ ] Desktop app fonctionnelle
+
+            > Généré automatiquement chaque lundi.
+          branch: sync/upstream-$(date +%Y-%m-%d)
+          base: main
+          labels: "sync,upstream"

@@ -1,0 +1,467 @@
+// Outio v2 — Prisma Schema
+// DB: Neon PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ──────────────────────────────────────────────
+
+enum Role {
+  user
+  admin
+  super_admin
+}
+
+enum Plan {
+  free
+  starter
+  pro
+  business
+}
+
+enum AgentAutonomy {
+  assisted
+  semi_auto
+  full_auto
+}
+
+enum GenerationType {
+  chat
+  agent
+  image
+  video
+  audio
+  social
+  campaign
+  research
+}
+
+enum JobStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+// ─── User ────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role     @default(user)
+  plan          Plan     @default(free)
+  credits       Int      @default(500)
+  creditsUsed   Int      @default(0)
+  language      String   @default("fr")
+  timezone      String   @default("UTC")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  conversations Conversation[]
+  generations   Generation[]
+  creations     Creation[]
+  agentRuns     AgentRun[]
+  audioProjects AudioProject[]
+  videoJobs     VideoJob[]
+  socialAccounts SocialAccount[]
+  campaigns     Campaign[]
+  gallery       GalleryItem[]
+  savedPrompts  SavedPrompt[]
+  memories      UserMemory[]
+  creditLogs    CreditLog[]
+
+  @@map("users")
+}
+
+// ─── Auth (NextAuth v5) ──────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── AI Models ───────────────────────────────────────────
+
+model AIModel {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  provider    String
+  category    String   // text | image | video | audio | music
+  credits     Int      // cost per action (1-100)
+  creditUnit  String   @default("per_message") // per_message | per_image | per_second | per_1k_chars | per_minute | per_track
+  contextWindow Int?
+  maxOutput   Int?
+  description String?
+  isActive    Boolean  @default(true)
+  isPremium   Boolean  @default(false)
+  minPlan     Plan     @default(free)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ai_models")
+}
+
+// ─── Agents ──────────────────────────────────────────────
+
+model Agent {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  name          String
+  category      String
+  description   String
+  avatar        String?
+  systemPromptFr String       @db.Text
+  systemPromptEn String       @db.Text
+  capabilities  String[]
+  powerUps      String[]
+  autonomy      AgentAutonomy @default(assisted)
+  model         String        @default("claude-sonnet-4-6")
+  temperature   Float         @default(0.7)
+  credits       Int           @default(10)
+  minPlan       Plan          @default(free)
+  isActive      Boolean       @default(true)
+  isFeatured    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  runs          AgentRun[]
+  memories      AgentMemory[]
+
+  @@map("agents")
+}
+
+model AgentRun {
+  id        String    @id @default(cuid())
+  userId    String
+  agentId   String
+  task      String    @db.Text
+  result    String?   @db.Text
+  steps     Json?
+  status    JobStatus @default(pending)
+  credits   Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agentId], references: [id])
+
+  @@map("agent_runs")
+}
+
+model AgentMemory {
+  id        String   @id @default(cuid())
+  agentId   String
+  userId    String
+  content   String   @db.Text
+  type      String   @default("long_term") // long_term | session
+  createdAt DateTime @default(now())
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@map("agent_memories")
+}
+
+// ─── Chat ────────────────────────────────────────────────
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String    @default("Nouvelle conversation")
+  model     String    @default("claude-haiku-4-5")
+  pinned    Boolean   @default(false)
+  archived  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String   // user | assistant | system
+  content        String   @db.Text
+  tokens         Int?
+  credits        Int?
+  model          String?
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+// ─── Generations ─────────────────────────────────────────
+
+model Generation {
+  id        String         @id @default(cuid())
+  userId    String
+  type      GenerationType
+  model     String
+  prompt    String?        @db.Text
+  result    String?        @db.Text
+  metadata  Json?
+  credits   Int            @default(0)
+  createdAt DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("generations")
+}
+
+// ─── Creations (Gallery) ─────────────────────────────────
+
+model Creation {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // image | video | audio | text
+  title     String?
+  url       String
+  thumbnail String?
+  metadata  Json?
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  galleryItem GalleryItem[]
+
+  @@map("creations")
+}
+
+model GalleryItem {
+  id         String   @id @default(cuid())
+  userId     String
+  creationId String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creation Creation @relation(fields: [creationId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_items")
+}
+
+// ─── Audio ───────────────────────────────────────────────
+
+model AudioProject {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  segments  Json?
+  finalUrl  String?
+  status    JobStatus @default(pending)
+  credits   Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audio_projects")
+}
+
+// ─── Video ───────────────────────────────────────────────
+
+model VideoJob {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  prompt    String    @db.Text
+  model     String
+  resultUrl String?
+  thumbnail String?
+  duration  Float?
+  status    JobStatus @default(pending)
+  credits   Int       @default(0)
+  metadata  Json?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("video_jobs")
+}
+
+// ─── Social Media ────────────────────────────────────────
+
+model SocialAccount {
+  id        String   @id @default(cuid())
+  userId    String
+  platform  String   // twitter | instagram | linkedin | tiktok | facebook
+  username  String
+  token     String?  @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts SocialPost[]
+
+  @@map("social_accounts")
+}
+
+model SocialPost {
+  id              String    @id @default(cuid())
+  socialAccountId String
+  content         String    @db.Text
+  mediaUrls       String[]
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  status          String    @default("draft")
+  credits         Int       @default(0)
+  createdAt       DateTime  @default(now())
+
+  account SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@map("social_posts")
+}
+
+// ─── Campaign ────────────────────────────────────────────
+
+model Campaign {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?  @db.Text
+  brandDNA    Json?
+  assets      Json?
+  status      String   @default("draft")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("campaigns")
+}
+
+// ─── Prompts ─────────────────────────────────────────────
+
+model Prompt {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String   @db.Text
+  category    String
+  tags        String[]
+  language    String   @default("fr")
+  isPublic    Boolean  @default(true)
+  isPremium   Boolean  @default(false)
+  usageCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  savedBy SavedPrompt[]
+
+  @@map("prompts")
+}
+
+model SavedPrompt {
+  id        String   @id @default(cuid())
+  userId    String
+  promptId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, promptId])
+  @@map("saved_prompts")
+}
+
+// ─── Memory ──────────────────────────────────────────────
+
+model UserMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String   @db.Text
+  type      String   @default("preference")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_memories")
+}
+
+// ─── Credits ─────────────────────────────────────────────
+
+model CreditLog {
+  id        String         @id @default(cuid())
+  userId    String
+  amount    Int
+  type      String         // debit | credit
+  source    GenerationType
+  model     String?
+  metadata  Json?
+  createdAt DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("credit_logs")
+}
+
+// ─── Plans ───────────────────────────────────────────────
+
+model PlanConfig {
+  id            String   @id @default(cuid())
+  plan          Plan     @unique
+  name          String
+  priceMonthly  Float
+  priceYearly   Float
+  credits       Int
+  maxModelTier  Int      // max credits per action (1-100)
+  features      String[]
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@map("plan_configs")
+}

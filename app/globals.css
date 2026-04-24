@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+/* ─── Outio Design System ─────────────────────────────── */
+
+@theme {
+  --color-primary:           #6B9080;
+  --color-primary-hover:     #5a7d6e;
+  --color-primary-light:     #A4C3B2;
+  --color-surface:           #CCE3DE;
+  --color-background:        #EAF4F4;
+  --color-background-light:  #F6FFF8;
+  --color-foreground:        #1a2e25;
+  --color-foreground-muted:  #4a6358;
+  --color-foreground-subtle: #7a9e8e;
+  --color-border:            #CCE3DE;
+  --color-border-strong:     #A4C3B2;
+  --color-success:           #2d9d6e;
+  --color-warning:           #d97706;
+  --color-error:             #dc2626;
+  --font-sans: "Inter", "SF Pro Display", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+  --shadow-sm:  0 1px 3px rgba(107,144,128,0.08);
+  --shadow-md:  0 4px 16px rgba(107,144,128,0.12);
+  --shadow-lg:  0 8px 32px rgba(107,144,128,0.16);
+  --shadow-xl:  0 16px 48px rgba(107,144,128,0.20);
+}
+
+/* ─── Light mode (default) ────────────────────────────── */
+:root {
+  --bg:           #EAF4F4;
+  --bg-light:     #F6FFF8;
+  --bg-card:      #ffffff;
+  --bg-surface:   #CCE3DE;
+  --border:       #CCE3DE;
+  --border-strong:#A4C3B2;
+  --text:         #1a2e25;
+  --text-muted:   #4a6358;
+  --text-subtle:  #7a9e8e;
+  --accent:       #6B9080;
+  --accent-hover: #5a7d6e;
+  --accent-light: #A4C3B2;
+}
+
+/* ─── Dark mode ───────────────────────────────────────── */
+.dark {
+  --bg:           #0f1f18;
+  --bg-light:     #162b20;
+  --bg-card:      #1c3028;
+  --bg-surface:   #243d32;
+  --border:       #2d4f3e;
+  --border-strong:#3d6b55;
+  --text:         #e8f4f0;
+  --text-muted:   #a4c3b2;
+  --text-subtle:  #6b9080;
+  --accent:       #6B9080;
+  --accent-hover: #7da090;
+  --accent-light: #A4C3B2;
+}
+
+/* ─── Base ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--border-strong); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ─── Selection ───────────────────────────────────────── */
+::selection { background: #A4C3B2; color: #1a2e25; }
+
+/* ─── Focus ───────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ─── Utils ───────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(164,195,178,0.3);
+}
+.dark .glass {
+  background: rgba(28,48,40,0.7);
+  border: 1px solid rgba(107,144,128,0.2);
+}
+.gradient-primary  { background: linear-gradient(135deg, #6B9080 0%, #A4C3B2 100%); }
+.gradient-soft     { background: linear-gradient(135deg, #EAF4F4 0%, #F6FFF8 100%); }
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-hover { transition: all 0.2s ease; }
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
