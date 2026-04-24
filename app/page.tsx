@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   ArrowRight, Sparkles, Bot, ImageIcon, Video,
   Mic, Share2, Megaphone, Search, ChevronRight,
-  Twitter, Github, Linkedin, Mail, Check,
+  MessageCircle, Code2, Briefcase, Mail, Check,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
@@ -424,7 +424,7 @@ export default function LandingPage() {
                 La plateforme IA tout-en-un pour créateurs, marketeurs et professionnels en Afrique et dans le monde.
               </p>
               <div className="flex gap-3">
-                {[Twitter, Github, Linkedin, Mail].map((Icon, i) => (
+                {[MessageCircle, Code2, Briefcase, Mail].map((Icon, i) => (
                   <a key={i} href="#"
                     className="w-9 h-9 flex items-center justify-center rounded-xl border transition-all hover:bg-[var(--bg-surface)] hover:border-[var(--border-strong)]"
                     style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
